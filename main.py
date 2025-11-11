@@ -1,8 +1,10 @@
 from src import create_app
-import subprocess
 from flask_cors import CORS
+from src.model import Db
 
-app = create_app();
+db=Db()
+
+app = create_app()
 CORS(app) 
 app.app_context().push()
 
