@@ -1,6 +1,7 @@
 import requests
 import json
 from typing import Dict, Any, Optional
+from src.config.colors import *
 
 def reloadApp() -> Dict[str, Any]:
 
@@ -19,7 +20,7 @@ def reloadApp() -> Dict[str, Any]:
     
     try:
 
-        print("\ndoing request to qlik app...\n")
+        print(cyan("[back-end]: ") + "Doing request to update qlik app...")
         response = requests.post(url, headers=headers, timeout=30)
         
         response.raise_for_status()
@@ -35,14 +36,14 @@ def reloadApp() -> Dict[str, Any]:
                 'status_code': response.status_code
             }
         
-        print(f"✅ App reload automation triggered successfully!")
-        print(f"Status Code: {response.status_code}")
+        print(green("[Qlik]: ") + "App reload automation triggered successfully!")
         
         return result
 
     except Exception as e:
+
+        print(red("[ERROR]: ") + f"Unexpected error occurred: {e}")
         error_msg = f"Unexpected error occurred: {e}"
-        print(f"❌ Error: {error_msg}")
         return {
             'status': 'error',
             'error': error_msg,
@@ -65,9 +66,9 @@ def reloadAppAsync() -> None:
     try:
         response = requests.post(url, headers=headers, timeout=5)
         if response.status_code in [200, 201, 202]:
-            print("✅ App reload automation triggered!")
+            print(green("[Qlik]: ") + "App reload automation triggered!")
         else:
-            print(f"⚠️ Automation triggered with status code: {response.status_code}")
+            print(cyan("[back-end]: ") + f"Automation triggered with status code: {response.status_code}")
     except Exception as e:
-        print(f"❌ Failed to trigger automation: {e}")
+        print(red("[ERROR]: ") + f"Failed to trigger automation: {e}")
 

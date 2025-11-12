@@ -1,8 +1,9 @@
 from flask import jsonify
 import google.generativeai as genai
-from src.model.classes.Qapp import *
+from src.model.services.Qapp import *
+from src.config.colors import *
 #from src.model import Db
-import json, os, base64
+import json, os, base64, traceback
 from datetime import datetime
 
 # Configuração da API Gemini
@@ -64,13 +65,14 @@ def analyseBill(data):
     Carrega arquivo enviado em base64 e o salva no disco.
     Retorna o caminho do arquivo salvo.
     """
-    print("Loading file...")
+    print(cyan("[back-end]: ") + "loading file...")
     
     filename = data.get('filename')
     filedata = data.get('data')  # Deve ser um dataURL: "data:image/png;base64,..."
     filetype = data.get('filetype')
 
     if not filename or not filedata:
+        print(red("[ERROR]: ") + "No file was founded.")
         return jsonify({'ok': False, 'error': 'filename ou data ausente'}), 400
 
     # Remove prefixo do DataURL e decodifica
@@ -89,11 +91,11 @@ def analyseBill(data):
         # Salva o arquivo
         with open(file_path, 'wb') as f:
             f.write(file_bytes)
-        
-        print(f"File saved: {file_path}")
+
+        print(cyan("[back-end]: ") + f"File saved: {file_path}")
         
     except Exception as e:
-        print(f"Error saving file: {e}")
+        print(red("[ERROR]: ") + f"Error saving file: {e}")
         return jsonify({'ok': False, 'status': f'Erro ao salvar arquivo: {str(e)}'}), 400
 
     if not file_path or not os.path.exists(file_path):
@@ -106,6 +108,8 @@ def analyseBill(data):
     # GEMINI \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
     bill_data = None
+
+    print(cyan("[back-end]: ") + "reading file...")
     
     # Determina o tipo MIME baseado na extensão
     ext = os.path.splitext(file_path)[1].lower()
@@ -136,9 +140,7 @@ def analyseBill(data):
             "nome":"nome da empresa provedora (Somente a primeira letra maiuscula)",
             "valor": "valor numérico em reais (ex: 150.50) ou null se não encontrado",
             "data": "data no formato DD/MM/YYYY ou null se não encontrado",
-            "localizacao": "endereço da empresa no qual o usuário fez o pagamento
-                (Caso somente contenha informações referentes ao nome empresa, 
-                pesquisar pelo endreço da mesma) ou cidade que o usuário fez o pagamento ou null se não encontrado",
+            "localizacao": "endereço da empresa no qual o usuário fez o pagamento ou cidade que o usuário fez o pagamento ou null se não encontrado",
             "tipo_conta": "Com base nas informações escolha uma das opções: {TYPES}",
             "empresa": "nome da empresa provedora ou null",
             "banco": "em que banco a transação foi efetuada: {BANKS}"
@@ -152,7 +154,9 @@ def analyseBill(data):
         - Para localização, use endereço ou cidade+estado se disponível"""
     ])
 
-    print(f"Response received: {response.text}")
+    print(cyan("[back-end]: ") + "File was read.")
+    # print(cyan("[back-end]: ") + "Data founded:")
+    # print(f"{response.text}")
 
     # Parse JSON response
     response_text = response.text.strip()
@@ -204,6 +208,7 @@ def analyseBill(data):
 
             reloadAppAsync()
 
+            print(cyan("[back-end]: ") + "Bill registered successfully!")
             return jsonify({
                 'ok': True,
                 'filename': os.path.basename(file_path),
@@ -212,6 +217,8 @@ def analyseBill(data):
                 'status': "Bill registered successfully"
             }), 201
         else:
+
+            print(red("[ERROR]: ") + f"Error inserting bill to database: {str(e)}")
             return jsonify({
                 'ok': False,
                 'status': 'Database insertion failed',
@@ -220,8 +227,8 @@ def analyseBill(data):
             }), 500
 
     except Exception as e:
-        print(f"Error inserting bill to database: {str(e)}")
-        import traceback
+
+        print(red("[ERROR]: ") + f"Error inserting bill to database: {str(e)}")
         traceback.print_exc()
         return jsonify({
             'ok': False,

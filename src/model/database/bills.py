@@ -1,4 +1,5 @@
 import uuid, calendar, datetime
+from src.config.colors import *
 
 class DbBill:
 
@@ -37,6 +38,7 @@ class DbBill:
                     remaining = value
 
                 print("Saving bill...")
+                print(blue("[Database]: ") + "Bill registering bill...")
 
                 cur.execute(
                     """INSERT INTO bills (bill_id, debtor_id, date, bill_name, value, installment, installment_value, remaining_installment, remaining, show, localization, bank, place, type, created_at)
@@ -60,12 +62,13 @@ class DbBill:
                     ),
                 )
 
-                print("\nBill registered successfuly!")
+                print(blue("[Database]: ") + "Bill registered successfuly!")
 
             self.conn.commit()
 
             return True    
-        except:            
+        except:  
+            print(red("[ERROR]: ") + "Some error occurredm was not possible complete the operation.")          
             return False
 
         
