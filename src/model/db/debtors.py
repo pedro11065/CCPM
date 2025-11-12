@@ -4,7 +4,6 @@ class DbDebtors:
         # keep a reference to the parent Db and its connection
         self.db = db
         self.conn = db.conn
-        self.debtors = self.searchDebtors()
 
     def search(self):
 

@@ -1,19 +1,28 @@
 from flask import jsonify
 import google.generativeai as genai
+from src.model.services.Qapp import *
 #from src.model import Db
 import json, os, base64
 from datetime import datetime
 
 # Configuração da API Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBFe0IwRlSAVfQBf3td4sBx69l_-3eIqic") ; genai.configure(api_key=GEMINI_API_KEY)
-UPLOAD_FOLDER = r"C:\Users\UXK\OneDrive - QlikTech Inc\Documents\Pedro\CCPM\data"
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+types = ["Home","Market","Leisure","Cloth","Restaurant","Public transport","Private transport","Studies","Digital","Health","Street food","Other"]
+banks = ["Inter","Pagbank"]
 
-def billInfo(self):
 
-    for i, debtor in enumerate(self.debtors): print(f"{i+1} - {debtor[1]}")
+def billInfo():
+
+    from src.model import Db
+    db = Db()
+    debtors = db.dbDebtors
+
+    for i, debtor in enumerate(debtors): print(f"{i+1} - {debtor[1]}")
     debtor = input("\nWho are you going to pay?: ") ; os.system("cls")
-    debtor_id = self.debtors[int(debtor)-1][0] ; print(debtor) ; os.system("cls")
-    debtor_limit = self.debtors[int(debtor)-1][2] ; print(debtor) ; os.system("cls")
+    debtor_id = debtors[int(debtor)-1][0] ; print(debtor) ; os.system("cls")
+    debtor_name = debtors[int(debtor)-1][1] ; print(debtor) ; os.system("cls")
+    debtor_limit = debtors[int(debtor)-1][2] ; print(debtor) ; os.system("cls")
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     name = input("What you bought?: ") ; os.system("cls")
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -22,6 +31,14 @@ def billInfo(self):
     value = float(input("How much?: ")) ; os.system("cls")
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     installment = int(input("How much installments?")) ; os.system("cls")
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+    localization = input("Where?(city): ") ; os.system("cls") #COORDENADAS
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    place = input("Where?(place): ") ; os.system("cls")
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    for i, type in enumerate(types): print(f"{i+1} - {type[1]}")
+    type = input("What type of account??: ") ; os.system("cls")
+    type = types[int(type)-1]
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     subscription = input("Its a subscription?? (s/n): ").strip().lower()
     if subscription in ("s", "sim", "y", "yes"):
@@ -33,7 +50,7 @@ def billInfo(self):
     remaining_installments = installment
     remaining = value
 
-    self.create(debtor_id, name, date, value, installment, installment_value, remaining_installments, remaining, subscription)
+    db.dbBill.create(debtor_id, name, date, value, installment, installment_value, remaining_installments, remaining, subscription, localization, debtor_name, place, type)
 
 
 #///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,9 +122,6 @@ def analyseBill(data):
     with open(file_path, 'rb') as f:
         file_bytes = f.read()
 
-    type_list = ["Home","Market","Leisure","Cloth","Restaurant","Public transport","Private transport","Studies","Digital","Health","Street food","Other"]
-    banks = ["Inter","Pagbank"]
-
     model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content([
         {
@@ -121,8 +135,10 @@ def analyseBill(data):
             "nome":"nome da empresa provedora (Somente a primeira letra maiuscula)",
             "valor": "valor numérico em reais (ex: 150.50) ou null se não encontrado",
             "data": "data no formato DD/MM/YYYY ou null se não encontrado",
-            "localizacao": "cidade, estado ou endereço ou null se não encontrado",
-            "tipo_conta": "Com base nas informações escolha uma das opções: {type_list}",
+            "localizacao": "endereço da empresa no qual o usuário fez o pagamento
+                (Caso somente contenha informações referentes ao nome empresa, 
+                pesquisar pelo endreço da mesma) ou cidade que o usuário fez o pagamento ou null se não encontrado",
+            "tipo_conta": "Com base nas informações escolha uma das opções: {types}",
             "empresa": "nome da empresa provedora ou null",
             "banco": "em que banco a transação foi efetuada: {banks}"
         }}
@@ -154,25 +170,40 @@ def analyseBill(data):
 
     try:
         from src.model import Db
-        
         db = Db()
         
-        debtor_id = "10108455-1f99-44a5-a09e-5f7673e9bab9"
-   
+        debtor_id = "10108455-1f99-44a5-a09e-5f7673e9bab9"        # Validate and convert data types safely
+        try:
+            date_value = datetime.strptime(bill_data.get("data", "01/01/2025"), "%d/%m/%Y")
+        except (ValueError, TypeError):
+            date_value = datetime.now()  # fallback to current date
+            
+        try:
+            valor_str = str(bill_data.get("valor", "0")).replace(",", ".")
+            value = float(valor_str) if valor_str != "null" and valor_str else 0.0
+        except (ValueError, TypeError):
+            value = 0.0
 
         success = db.bill.create(
             debtor_id=debtor_id,
             name=bill_data.get("nome", "Fatura"),
-            date=datetime.strptime(bill_data.get("data", "01/01/2025"), "%d/%m/%Y"),
-            value=float(str(bill_data.get("valor", "0")).replace(",", ".")),
+            date=date_value,
+            value=value,
             installment=1,
-            installment_value=float(str(bill_data.get("valor", "0")).replace(",", ".")),
+            installment_value=value,
             remaining_installments=1,
-            remaining=float(str(bill_data.get("valor", "0")).replace(",", ".")),
-            subscription=False
+            remaining=value,
+            subscription=False,
+            localization=bill_data.get("localizacao"),
+            bank=bill_data.get("banco"),
+            place=bill_data.get("empresa"),
+            type=bill_data.get("tipo_conta"),
         )
 
         if success:
+
+            reloadApp()
+
             return jsonify({
                 'ok': True,
                 'filename': os.path.basename(file_path),

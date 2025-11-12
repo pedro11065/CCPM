@@ -6,11 +6,10 @@ class DbBill:
         # keep a reference to the parent Db and its connection
         self.db = db
         self.conn = db.conn
-        self.debtors = self.searchDebtors()
 
     
 
-    def create(self, debtor_id, name, date, value, installment, installment_value, remaining_installments, remaining, subscription):
+    def create(self, debtor_id, name, date, value, installment, installment_value, remaining_installments, remaining, subscription, localization, bank, place, type):
 
         def add_months(dt, months):
             month = dt.month - 1 + months
@@ -40,8 +39,8 @@ class DbBill:
                 print("Saving bill...")
 
                 cur.execute(
-                    """INSERT INTO bills (bill_id, debtor_id, date, bill_name, value, installment, installment_value, remaining_installment, remaining, show)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                    """INSERT INTO bills (bill_id, debtor_id, date, bill_name, value, installment, installment_value, remaining_installment, remaining, show, localization, bank, place, type)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     (
                         bill_id,
                         debtor_id,
@@ -53,6 +52,10 @@ class DbBill:
                         remaining_installments - i,
                         remaining - installment_value * i,
                         True,
+                        localization, 
+                        bank, 
+                        place, 
+                        type
                     ),
                 )
 

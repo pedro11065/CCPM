@@ -8,10 +8,17 @@ class Db:
 
         self.conn = self.connectDb()
 
-        self.dbDebtors = DbDebtors
-        self.dbBill = DbBill
-        self.dbSalary = DbSalary
-        self.dbTransport = DbTransport
+        # Instantiate helpers with a reference to this Db instance
+        self.dbDebtors = DbDebtors(self)
+        self.dbBill = DbBill(self)
+        self.dbSalary = DbSalary(self)
+        self.dbTransport = DbTransport(self)
+
+        # Short aliases (optional, for convenient access)
+        self.debtors = self.dbDebtors
+        self.bill = self.dbBill
+        self.salary = self.dbSalary
+        self.transport = self.dbTransport
 
 
     def connectDb(self):
