@@ -199,6 +199,7 @@ def analyseBill(data):
             bank=bill_data.get("banco"),
             place=bill_data.get("empresa"),
             type=bill_data.get("tipo_conta"),
+            credit = False
         )
 
         if success:
