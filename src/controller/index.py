@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template
-from src.model.services.bill import *
+from src.model.classes.bill import *
 
 index = Blueprint('auth_index', __name__, template_folder='templates', static_folder='static')
 
