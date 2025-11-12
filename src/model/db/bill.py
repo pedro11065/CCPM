@@ -1,4 +1,4 @@
-import uuid, calendar
+import uuid, calendar, datetime
 
 class DbBill:
 
@@ -39,8 +39,8 @@ class DbBill:
                 print("Saving bill...")
 
                 cur.execute(
-                    """INSERT INTO bills (bill_id, debtor_id, date, bill_name, value, installment, installment_value, remaining_installment, remaining, show, localization, bank, place, type)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                    """INSERT INTO bills (bill_id, debtor_id, date, bill_name, value, installment, installment_value, remaining_installment, remaining, show, localization, bank, place, type, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     (
                         bill_id,
                         debtor_id,
@@ -55,7 +55,8 @@ class DbBill:
                         localization, 
                         bank, 
                         place, 
-                        type
+                        type,
+                        datetime.datetime.now()
                     ),
                 )
 

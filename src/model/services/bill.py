@@ -8,8 +8,9 @@ from datetime import datetime
 # Configuração da API Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBFe0IwRlSAVfQBf3td4sBx69l_-3eIqic") ; genai.configure(api_key=GEMINI_API_KEY)
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
-types = ["Home","Market","Leisure","Cloth","Restaurant","Public transport","Private transport","Studies","Digital","Health","Street food","Other"]
-banks = ["Inter","Pagbank"]
+
+TYPES = ["Home","Market","Leisure","Cloth","Restaurant","Public transport","Private transport","Studies","Digital","Health","Street food","Other"]
+BANKS = ["Inter","Pagbank"]
 
 
 def billInfo():
@@ -22,7 +23,7 @@ def billInfo():
     debtor = input("\nWho are you going to pay?: ") ; os.system("cls")
     debtor_id = debtors[int(debtor)-1][0] ; print(debtor) ; os.system("cls")
     debtor_name = debtors[int(debtor)-1][1] ; print(debtor) ; os.system("cls")
-    debtor_limit = debtors[int(debtor)-1][2] ; print(debtor) ; os.system("cls")
+    #debtor_limit = debtors[int(debtor)-1][2] ; print(debtor) ; os.system("cls")
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     name = input("What you bought?: ") ; os.system("cls")
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -36,9 +37,9 @@ def billInfo():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     place = input("Where?(place): ") ; os.system("cls")
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    for i, type in enumerate(types): print(f"{i+1} - {type[1]}")
+    for i, type in enumerate(TYPES): print(f"{i+1} - {type[1]}")
     type = input("What type of account??: ") ; os.system("cls")
-    type = types[int(type)-1]
+    type = TYPES[int(type)-1]
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     subscription = input("Its a subscription?? (s/n): ").strip().lower()
     if subscription in ("s", "sim", "y", "yes"):
@@ -138,9 +139,9 @@ def analyseBill(data):
             "localizacao": "endereço da empresa no qual o usuário fez o pagamento
                 (Caso somente contenha informações referentes ao nome empresa, 
                 pesquisar pelo endreço da mesma) ou cidade que o usuário fez o pagamento ou null se não encontrado",
-            "tipo_conta": "Com base nas informações escolha uma das opções: {types}",
+            "tipo_conta": "Com base nas informações escolha uma das opções: {TYPES}",
             "empresa": "nome da empresa provedora ou null",
-            "banco": "em que banco a transação foi efetuada: {banks}"
+            "banco": "em que banco a transação foi efetuada: {BANKS}"
         }}
 
         IMPORTANTE:
@@ -164,6 +165,13 @@ def analyseBill(data):
     response_text = response_text.strip()
     
     bill_data = json.loads(response_text)
+
+
+    if bill_data.get("banco") == "Inter":
+        bill_data["banco"] = "87d68d70-e7d5-4a60-a6eb-2b27b9bbefe6"
+    elif bill_data.get("banco") == "PagBank":
+        bill_data["banco"] = "2c589c1c-e034-1250-9827-bf1f793b72b9"
+    else: bill_data["banco"] = "10108455-1f99-44a5-a09e-5f7673e9bab9"
 
 
     # DATABASE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -202,7 +210,7 @@ def analyseBill(data):
 
         if success:
 
-            reloadApp()
+            reloadAppAsync()
 
             return jsonify({
                 'ok': True,
