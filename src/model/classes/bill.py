@@ -8,7 +8,7 @@ from datetime import datetime
 
 # Configuração da API Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBFe0IwRlSAVfQBf3td4sBx69l_-3eIqic") ; genai.configure(api_key=GEMINI_API_KEY)
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data/receipts")
 
 TYPES = ["Home","Market","Leisure","Cloth","Restaurant","Public transport","Private transport","Studies","Digital","Health","Street food","Other"]
 BANKS = ["Inter","Pagbank"]
