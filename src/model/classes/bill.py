@@ -139,10 +139,10 @@ def analyseBill(data):
         {{
             "nome":"nome da empresa provedora (Somente a primeira letra maiuscula)",
             "valor": "valor numérico em reais (ex: 150.50) ou null se não encontrado",
-            "data": "data no formato DD/MM/YYYY ou null se não encontrado",
-            "localizacao": "endereço da empresa no qual o usuário fez o pagamento ou cidade que o usuário fez o pagamento ou null se não encontrado",
+            "data": "data no formato AAAA-MM-DD HH:MM:SS ou null se não encontrado",
+            "localizacao": "cidade que o usuário fez o pagamento(somente a cidade) ou null se não encontrado",
             "tipo_conta": "Com base nas informações escolha uma das opções: {TYPES}",
-            "empresa": "nome da empresa provedora ou null",
+            "empresa": "nome da empresa provedora(Somente a primeira letra maiuscula) ou null",
             "banco": "em que banco a transação foi efetuada: {BANKS}"
         }}
 
@@ -177,11 +177,8 @@ def analyseBill(data):
         db = Db()
         
         debtor_id = "10108455-1f99-44a5-a09e-5f7673e9bab9"        # Validate and convert data types safely
-        try:
-            date_value = datetime.strptime(bill_data.get("data", "01/01/2025"), "%d/%m/%Y")
-        except (ValueError, TypeError):
-            date_value = datetime.now()  # fallback to current date
-            
+        date_value = bill_data.get("data")
+       
         try:
             valor_str = str(bill_data.get("valor", "0")).replace(",", ".")
             value = float(valor_str) if valor_str != "null" and valor_str else 0.0
@@ -218,7 +215,7 @@ def analyseBill(data):
             }), 201
         else:
 
-            print(red("[ERROR]: ") + f"Error inserting bill to database: {str(e)}")
+            print(red("[ERROR]: ") + f"Error inserting bill to database.")
             return jsonify({
                 'ok': False,
                 'status': 'Database insertion failed',

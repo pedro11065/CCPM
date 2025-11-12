@@ -24,9 +24,13 @@ class DbBill:
 
 
             for i in range(installment):
-                bill_date = add_months(date, i)
+
                 bill_id = str(uuid.uuid4())
-           
+                bill_date = date
+
+                if int(installment > 1):
+                    bill_date = add_months(date, i)
+            
                 if subscription:
 
                     installment_value = value
@@ -37,8 +41,10 @@ class DbBill:
                     installment_value = value / installment
                     remaining = value
 
-                print("Saving bill...")
-                print(blue("[Database]: ") + "Bill registering bill...")
+                timestamp = datetime.datetime.now()
+                formatted_string = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+
+                print(blue("[Database]: ") + "registering bill...")
 
                 cur.execute(
                     """INSERT INTO bills (bill_id, debtor_id, date, bill_name, value, installment, installment_value, remaining_installment, remaining, show, localization, bank, place, type, created_at)
@@ -58,7 +64,7 @@ class DbBill:
                         bank, 
                         place, 
                         type,
-                        datetime.datetime.now()
+                        formatted_string
                     ),
                 )
 
@@ -67,8 +73,8 @@ class DbBill:
             self.conn.commit()
 
             return True    
-        except:  
-            print(red("[ERROR]: ") + "Some error occurredm was not possible complete the operation.")          
+        except Exception as e:  
+            print(red("[ERROR]: ") + f"Some error occurred was not possible complete the operation: {e}")          
             return False
 
         
