@@ -1,5 +1,5 @@
 import dotenv, psycopg2, os
-from src.model.db import *
+from src.model.database import *
 from src.model.services import *
 
 class Db:
