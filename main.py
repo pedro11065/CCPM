@@ -11,4 +11,4 @@ app.app_context().push()
 #script_path = 'app.py'
 #subprocess.Popen(['start', 'cmd', '/K', f'python {script_path}'], shell=True)
 
-app.run(debug=True) 
+app.run(host="0.0.0.0", port=5000)
