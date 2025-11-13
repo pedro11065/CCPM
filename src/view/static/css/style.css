@@ -24,13 +24,12 @@ body {
     align-items: center;
     justify-content: center;
     padding: 16px;
-    overflow: hidden;
 }
 
 .container {
     width: 100%;
     max-width: 428px;
-    max-height: 100vh;
+    max-height: auto;
     display: flex;
     flex-direction: column;
     gap: 24px;
