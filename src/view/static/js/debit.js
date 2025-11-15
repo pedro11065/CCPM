@@ -11,7 +11,7 @@ const statusMessage = document.getElementById('statusMessage');
 let selectedFiles = [];
 
 // API Configuration
-const API_ENDPOINT = '/api/upload';
+const API_ENDPOINT = '/api/debit';
 
 // File validation
 function validateFile(file) {
