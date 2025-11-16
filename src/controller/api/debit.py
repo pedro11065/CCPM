@@ -7,7 +7,7 @@ debit = Blueprint('debit_api', __name__, template_folder='templates', static_fol
 @debit.route('/debit', methods= ['POST']) #methods=['GET', 'POST']
 def debit_upload():
         
-    print(yellow("[API]: ") + "POST request from api/upload received")
+    print(yellow("[API]: ") + "POST request from api/debit received")
 
     data = request.get_json() ; backend = Backend()
     return backend.bill.debit(data)

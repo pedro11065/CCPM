@@ -6,10 +6,14 @@ def create_app():
 
     from .controller.index import index
     from .controller.api.debit import debit
+    from .controller.api.credit import credit
+    from .controller.api.salary import salary
 
     #app.register_blueprint(index, url_prefix='/home')
     app.register_blueprint(index, url_prefix='/')
     app.register_blueprint(debit, url_prefix='/api')
+    app.register_blueprint(credit, url_prefix='/api')
+    app.register_blueprint(salary, url_prefix='/api')
     #app.register_blueprint(index, url_prefix='')
 
 

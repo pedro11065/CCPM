@@ -1,6 +1,7 @@
 from src.model.classes.bill import *
 from src.model.classes.salary import *
 from src.model.classes.user import *
+from src.model.classes.salary import *
 
 class Backend:
 

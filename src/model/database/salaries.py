@@ -1,5 +1,6 @@
 import  uuid, calendar
 from datetime import datetime
+from src.config.colors import *
 
 class DbSalary:
 
@@ -8,34 +9,26 @@ class DbSalary:
         self.db = db
         self.conn = db.conn
 
-    def create(self, date, value, times):
+    def create(self, date, value, description):
+        try:
+            cur = self.conn.cursor()
+            salary_id = str(uuid.uuid4())
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        
-        def add_months(dt, months):
-            month = dt.month - 1 + months
-            year = dt.year + month // 12
-            month = month % 12 + 1
-            day = min(dt.day, calendar.monthrange(year, month)[1])
-            return dt.replace(year=year, month=month, day=day)
-
-        start_date = date
-
-        cur = self.conn.cursor()
-
-        for i in range(times):
-            current_date = add_months(start_date, i)
-            user_id = str(uuid.uuid4())
+            print(blue("[Database]: ") + "registering salary...")
 
             cur.execute(
-                """INSERT INTO salary (user_id, date, user_salary)
-                    VALUES (%s, %s, %s)""",
-                (
-                    user_id,
-                    current_date.date() if isinstance(current_date, datetime) else current_date,
-                    value,
-                ),
+                """INSERT INTO salary (salary_id, date, salary_value, description, created_at)
+                    VALUES (%s, %s, %s, %s, %s)""",
+                (salary_id, date, value, description, timestamp),
             )
-        cur.close()
-        self.conn.commit()
+            
+            self.conn.commit()
+            cur.close()
 
-        print("\nBill registered successfuly!")
+            print(green("[Database]: ") + "Salary registered successfully!")
+            return True
+        except Exception as e:
+            print(red("[ERROR]: ") + f"Could not register salary: {e}")
+            self.conn.rollback()
+            return False
