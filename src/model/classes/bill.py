@@ -55,7 +55,7 @@ class Bill:
 
         db.dbBill.create(debtor_id, name, date, value, installment, installment_value, remaining_installments, remaining, subscription, localization, debtor_name, place, type)
 
-
+    @staticmethod
     def debit(data):
         """
         Carrega arquivo enviado em base64 e o salva no disco.

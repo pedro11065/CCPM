@@ -92,20 +92,46 @@
             color: white;
         }
         
+        /* Cores do Toast de Erro */
+        .toast-error {
+            background-color: #EF4444; /* bg-red-500 */
+            color: white;
+        }
+        
+        .toast-icon {
+            width: 1.5rem; /* w-6 */
+            height: 1.5rem; /* h-6 */
+            stroke-width: 2;
+        }
+
+        .toast-close-btn {
+            margin-left: auto; /* ml-auto */
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .toast-close-btn:hover {
+            opacity: 1;
+        }
+        
+
         /* Estilos de Transição de Seção (Fade/Slide) */
         .section-content, #loginModal, #appContent {
-            transition: opacity 300ms ease-out; /* Removido o 'transform' */
+            transition: opacity 300ms ease-out, transform 300ms ease-out;
         }
 
         .fade-out {
             opacity: 0;
-            /* Removido: transform: translateY(10px); */
+            transform: translateY(10px);
             pointer-events: none;
         }
 
         .fade-in {
             opacity: 1;
-            /* Removido: transform: translateY(0); */
+            transform: translateY(0);
         }
 
         /* Oculta o input de arquivo original */
@@ -206,21 +232,6 @@
         <div id="upload-section" class="p-6 sm:p-8 section-content fade-in">
             <form id="upload-form" class="space-y-6">
                 
-                <!-- Nova Seleção de Débito/Crédito -->
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-700">Tipo de Upload</label>
-                    <div class="flex items-center space-x-6 rounded-lg border border-gray-300 p-3 bg-gray-50 shadow-sm">
-                        <label for="type-debit" class="flex items-center cursor-pointer">
-                            <input type="radio" id="type-debit" name="upload-type" value="debit" class="h-4 w-4 text-blue-600 border-gray-400 focus:ring-blue-500" checked>
-                            <span class="ml-2 text-sm font-medium text-gray-800">Débito</span>
-                        </label>
-                        <label for="type-credit" class="flex items-center cursor-pointer">
-                            <input type="radio" id="type-credit" name="upload-type" value="credit" class="h-4 w-4 text-red-600 border-gray-400 focus:ring-red-500">
-                            <span class="ml-2 text-sm font-medium text-gray-800">Crédito</span>
-                        </label>
-                    </div>
-                </div>
-
                 <!-- Novo Preview de Imagem -->
                 <div id="image-preview-container" class="w-full max-w-md mx-auto hidden">
                     <img id="image-preview" src="#" alt="Preview da Imagem" />
@@ -353,16 +364,6 @@
                 setTimeout(removeToast, 4000); // Auto-dismiss after 4 seconds
             }
 
-            // --- Helper para converter arquivo para Base64 ---
-            function toBase64(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
-                });
-            }
-
 
             // --- Lógica do Modal de Login (Atualizada com Transições e Toast) ---
             loginForm.addEventListener('submit', async (e) => {
@@ -373,90 +374,59 @@
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
 
-                try {
-                    const response = await fetch('/api/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            username: username,
-                            password: password
-                        })
-                    });
+                // Simula uma chamada de API
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
-                    const data = await response.json();
-
-                    if (response.ok && data.ok) {
-                        // Sucesso no login
-                        showToast(data.message || 'Login bem-sucedido!', 'success');
+                if (username === 'admin' && password === '1234') {
+                    // Sucesso no login
+                    showToast('Login bem-sucedido!', 'success');
+                    
+                    // Animação de saída do modal
+                    loginModal.classList.add('fade-out');
+                    
+                    setTimeout(() => {
+                        loginModal.classList.add('hidden');
                         
-                        // Animação de saída do modal
-                        loginModal.classList.add('fade-out');
-                        
-                        setTimeout(() => {
-                            loginModal.classList.add('hidden');
-                            
-                            // Animação de entrada do app
-                            appContent.classList.remove('hidden');
-                            requestAnimationFrame(() => {
-                                 appContent.classList.remove('opacity-0');
-                                 appContent.classList.add('fade-in');
-                            });
-                           
-                        }, 300); // Tempo da animação de fade-out
-                    } else {
-                        // Erro retornado pela API
-                        throw new Error(data.error || 'Usuário ou senha inválidos.');
-                    }
+                        // Animação de entrada do app
+                        appContent.classList.remove('hidden');
+                        requestAnimationFrame(() => {
+                             appContent.classList.remove('opacity-0');
+                             appContent.classList.add('fade-in');
+                        });
+                       
+                    }, 300); // Tempo da animação de fade-out
 
-                } catch (error) {
-                    // Erro de rede, JSON ou da API
-                    showToast(error.message, 'error');
+                } else {
+                    // Erro no login
+                    showToast('Usuário ou senha inválidos.', 'error');
                     loginBtn.disabled = false;
                     loginBtn.textContent = 'Entrar';
                 }
             });
 
-            // --- Lógica de Navegação (Atualizada com Transições e Correção de Bug) ---
+
+            // --- Lógica de Navegação (Atualizada com Transições) ---
             function showSection(sectionId) {
                 const sections = [uploadSection, entrySection];
                 const navs = [navUpload, navEntry];
                 const activeNav = (sectionId === 'upload-section') ? navUpload : navEntry;
                 const activeSection = (sectionId === 'upload-section') ? uploadSection : entrySection;
 
-                // Encontra a seção ativa atual (que não está 'hidden')
-                const currentActiveSection = sections.find(s => !s.classList.contains('hidden'));
-
-                if (currentActiveSection === activeSection) {
-                    return; // Já está na seção correta, não faz nada
-                }
-
-                // Esconde a seção atual (se houver uma)
-                if (currentActiveSection) {
-                    currentActiveSection.classList.remove('fade-in');
-                    currentActiveSection.classList.add('fade-out');
-                    
-                    // Espera a animação de fade-out (300ms) terminar
-                    setTimeout(() => {
-                        currentActiveSection.classList.add('hidden');
-                        
-                        // Agora, mostra a nova seção
-                        activeSection.classList.remove('hidden');
-                        activeSection.classList.remove('fade-out'); // Garante que está limpo
-                        requestAnimationFrame(() => {
-                            // Adiciona a classe de fade-in para a nova seção aparecer
-                            activeSection.classList.add('fade-in');
-                        });
-                        
-                    }, 300); // Deve ser igual ao tempo da transição no CSS
-                } else {
-                    // Se nenhuma seção estiver ativa (carregamento inicial, embora já tratado)
-                    activeSection.classList.remove('hidden');
+                // Atualiza seções
+                sections.forEach(section => {
+                    if (section !== activeSection) {
+                        section.classList.add('fade-out');
+                        setTimeout(() => section.classList.add('hidden'), 300);
+                    }
+                });
+                
+                activeSection.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    activeSection.classList.remove('fade-out');
                     activeSection.classList.add('fade-in');
-                }
+                });
 
-                // Atualiza o estilo das abas (pode ser imediato)
+                // Atualiza abas
                 navs.forEach(nav => {
                     nav.classList.remove('text-blue-600', 'border-blue-600');
                     nav.classList.add('text-gray-500', 'hover:text-gray-700');
@@ -474,39 +444,24 @@
                 e.preventDefault();
                 const submitButton = entryForm.querySelector('button[type="submit"]');
                 const originalButtonText = submitButton.textContent;
-                
-                const valorRaw = document.getElementById('entry-valor').value;
-                const data = document.getElementById('entry-data').value;
-                const desc = document.getElementById('entry-desc').value;
-
-                if (!valorRaw || !data) {
-                    showToast('Os campos Valor e Data são obrigatórios.', 'error');
-                    return;
-                }
-                
-                // Converte "1234.56" para 1234.56
-                const valor = parseFloat(valorRaw);
-
-                if (isNaN(valor) || valor <= 0) {
-                    showToast('Por favor, insira um valor válido.', 'error');
-                    return;
-                }
-
                 submitButton.disabled = true;
                 submitButton.textContent = 'Adicionando...';
 
+                const valor = document.getElementById('entry-valor').value;
+                const desc = document.getElementById('entry-desc').value;
+                const data = document.getElementById('entry-data').value;
+
                 try {
-                    const response = await fetch('/api/salary', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ valor, data, desc })
+                    // Simula chamada de API
+                    await new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            if (valor && data) {
+                                resolve({ ok: true, message: "Entrada adicionada" });
+                            } else {
+                                reject(new Error('Campos obrigatórios faltando.'));
+                            }
+                        }, 1000);
                     });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(result.error || 'Erro ao adicionar entrada.');
-                    }
 
                     showToast('Entrada adicionada com sucesso!', 'success');
                     entryForm.reset();
@@ -548,48 +503,29 @@
                 uploadLabel.classList.remove('hidden'); // Mostra a label de upload
             });
             
-            // --- Lógica de Envio de Upload (Atualizada com Débito/Crédito) ---
+            // --- Lógica de Envio de Upload (Atualizada com Toast) ---
             uploadForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const submitButton = uploadForm.querySelector('button[type="submit"]');
                 const originalButtonText = submitButton.textContent;
                 
-                const file = uploadInput.files[0];
-                if (!file) {
+                if (!uploadInput.files[0]) {
                     showToast('Por favor, selecione uma imagem para enviar.', 'error');
                     return;
                 }
-
-                const selectedType = document.querySelector('input[name="upload-type"]:checked').value;
-                const apiUrl = (selectedType === 'debit') ? '/api/debit' : '/api/credit';
                 
                 submitButton.disabled = true;
                 submitButton.textContent = 'Enviando...';
                 
+                // Simula um upload
                 try {
-                    const base64Data = await toBase64(file);
-
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            data: base64Data,
-                            filename: file.name,
-                            // O endpoint de crédito pode precisar de um 'card', mas o form atual não tem.
-                            // Se necessário, adicione um campo de seleção de cartão ao formulário.
-                            card: 'default' // Valor padrão, ajuste se necessário
-                        })
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(result.error || 'Falha no upload');
-                    }
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    // Em um app real, você usaria FormData e fetch aqui
                     
-                    showToast(`Upload (${selectedType}) bem-sucedido!`, 'success');
+                    showToast('Upload bem-sucedido!', 'success');
                     
-                    removeBtn.click(); // Limpa o formulário
+                    // Limpa o formulário após o sucesso
+                    removeBtn.click(); // Reutiliza a lógica de limpeza
                     
                 } catch (error) {
                     showToast(`Erro no upload: ${error.message}`, 'error');
@@ -599,8 +535,15 @@
                 }
             });
 
+            // --- Lógica original de setupFileInput (agora não é mais necessária para o upload principal) ---
+            // A lógica de setupFileInput original foi substituída pela de preview
+            // Se você ainda tiver os inputs 'debit-file' e 'credit-file' em outro lugar,
+            // você pode re-adicionar aquela função aqui.
+            
+            // setupFileInput('debit-file', 'debit-file-name');
+            // setupFileInput('credit-file', 'credit-file-name');
+
         });
     </script>
 </body>
 </html>
-``` 
