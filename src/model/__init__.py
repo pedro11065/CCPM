@@ -1,4 +1,4 @@
-from src.model.services.readEnv import *
+from src.model.services.auth.readEnv import *
 from src.model.database import *
 from src.model.classes import *
 

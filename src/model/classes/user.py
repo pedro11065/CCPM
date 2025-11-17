@@ -1,4 +1,4 @@
-from src.model.services.readEnv import *
+from src.model.services.auth.readEnv import *
 from src.config.colors import *
 from flask import jsonify
 class User:
