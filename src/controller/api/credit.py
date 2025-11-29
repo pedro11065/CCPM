@@ -12,4 +12,10 @@ def credit_upload():
     data = request.get_json() ; backend = Backend()
     return backend.bill.credit(data)
 
+@credit.route('/credit/form', methods= ['POST']) #methods=['GET', 'POST']
+def credit_form_load():
+        
+    print(yellow("[API]: ") + "POST request from api/credit/form received")
 
+    data = request.get_json() ; backend = Backend()
+    return backend.bill.credit(data, photo=False)

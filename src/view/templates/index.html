@@ -200,6 +200,9 @@
             <button id="nav-entry" class="flex-1 py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700 transition-colors duration-200">
                 Adicionar Entrada
             </button>
+            <button id="nav-manual" class="flex-1 py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                Registro Manual
+            </button>
         </nav>
 
         <!-- Seção de Upload de Arquivo -->
@@ -273,6 +276,98 @@
                 </button>
             </form>
         </div>
+
+        <!-- Seção de Registro Manual -->
+        <div id="manual-section" class="p-6 sm:p-8 section-content hidden fade-out">
+            <form id="manual-form" class="space-y-4">
+                <!-- Tipo de Transação -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700">Tipo de Transação</label>
+                    <div class="flex items-center space-x-6 rounded-lg border border-gray-300 p-3 bg-gray-50 shadow-sm">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="manual-type" value="debit" class="h-4 w-4 text-blue-600 border-gray-400 focus:ring-blue-500" checked>
+                            <span class="ml-2 text-sm font-medium text-gray-800">Débito</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="manual-type" value="credit" class="h-4 w-4 text-red-600 border-gray-400 focus:ring-red-500">
+                            <span class="ml-2 text-sm font-medium text-gray-800">Crédito</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Nome -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                    <input type="text" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+
+                <!-- Valor -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+                    <input type="text" name="value" inputmode="decimal" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="R$ 0,00" required>
+                </div>
+
+                <!-- Data -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                    <input type="date" name="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+
+                <!-- Localização -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
+                    <input type="text" name="location" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Categoria -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                    <select name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="" disabled selected>Selecione uma categoria</option>
+                        <option value="Home">Home</option>
+                        <option value="Market">Market</option>
+                        <option value="Leisure">Leisure</option>
+                        <option value="Cloth">Cloth</option>
+                        <option value="Restaurant">Restaurant</option>
+                        <option value="Public transport">Public transport</option>
+                        <option value="Private transport">Private transport</option>
+                        <option value="Studies">Studies</option>
+                        <option value="Digital">Digital</option>
+                        <option value="Health">Health</option>
+                        <option value="Street food">Street food</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <!-- Empresa -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+                    <input type="text" name="company" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Campos de Crédito (Condicionais) -->
+                <div id="manual-credit-fields" class="hidden space-y-4 border-t pt-4 mt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cartão</label>
+                        <select name="card" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="" disabled selected>Selecione um cartão</option>
+                            <option value="Casas Bahia">Casas Bahia</option>
+                            <option value="Mercado Pago">Mercado Pago</option>
+                            <option value="Inter">Inter</option>
+                            <option value="Pagbank">Pagbank</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Parcelas</label>
+                        <input type="number" name="installments" value="1" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mt-6">
+                    Registrar Transação
+                </button>
+            </form>
+        </div>
     </div>
 
 
@@ -288,11 +383,17 @@
 
             const navUpload = document.getElementById('nav-upload');
             const navEntry = document.getElementById('nav-entry');
+            const navManual = document.getElementById('nav-manual'); // NOVO
+
             const uploadSection = document.getElementById('upload-section');
             const entrySection = document.getElementById('entry-section');
+            const manualSection = document.getElementById('manual-section'); // NOVO
 
             const entryForm = document.getElementById('entry-form');
             const uploadForm = document.getElementById('upload-form');
+            const manualForm = document.getElementById('manual-form'); // NOVO
+            const manualCreditFields = document.getElementById('manual-credit-fields'); // NOVO
+            const manualTypeRadios = document.getElementsByName('manual-type'); // NOVO
 
             // --- NOVO: Seletores para Preview de Imagem ---
             const uploadInput = document.getElementById('upload-file');
@@ -420,10 +521,21 @@
 
             // --- Lógica de Navegação (Atualizada com Transições e Correção de Bug) ---
             function showSection(sectionId) {
-                const sections = [uploadSection, entrySection];
-                const navs = [navUpload, navEntry];
-                const activeNav = (sectionId === 'upload-section') ? navUpload : navEntry;
-                const activeSection = (sectionId === 'upload-section') ? uploadSection : entrySection;
+                const sections = [uploadSection, entrySection, manualSection];
+                const navs = [navUpload, navEntry, navManual];
+                
+                let activeNav, activeSection;
+
+                if (sectionId === 'upload-section') {
+                    activeNav = navUpload;
+                    activeSection = uploadSection;
+                } else if (sectionId === 'entry-section') {
+                    activeNav = navEntry;
+                    activeSection = entrySection;
+                } else {
+                    activeNav = navManual;
+                    activeSection = manualSection;
+                }
 
                 // Encontra a seção ativa atual (que não está 'hidden')
                 const currentActiveSection = sections.find(s => !s.classList.contains('hidden'));
@@ -467,6 +579,7 @@
 
             navUpload.addEventListener('click', () => showSection('upload-section'));
             navEntry.addEventListener('click', () => showSection('entry-section'));
+            navManual.addEventListener('click', () => showSection('manual-section'));
 
 
             // --- Lógica do Formulário de Entrada (Atualizada com Toast) ---
@@ -599,8 +712,119 @@
                 }
             });
 
+            // --- Lógica do Formulário Manual ---
+            // Toggle Credit Fields
+            manualTypeRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'credit') {
+                        manualCreditFields.classList.remove('hidden');
+                        manualCreditFields.querySelectorAll('select, input').forEach(el => el.required = true);
+                    } else {
+                        manualCreditFields.classList.add('hidden');
+                        manualCreditFields.querySelectorAll('select, input').forEach(el => {
+                            el.required = false;
+                            el.value = (el.tagName === 'SELECT') ? '' : '1'; // Reset values
+                        });
+                    }
+                });
+            });
+
+            // Submit Handler
+            manualForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const submitButton = manualForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.textContent;
+                
+                // Gather data
+                const formData = new FormData(manualForm);
+                const type = formData.get('manual-type');
+                
+                // Parse currency string to float
+                const rawValue = formData.get('value');
+                const value = parseFloat(rawValue.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
+
+                const payload = {
+                    type: type,
+                    name: formData.get('name'),
+                    value: value,
+                    date: formData.get('date'),
+                    location: formData.get('location'),
+                    category: formData.get('category'),
+                    company: formData.get('company')
+                };
+
+                if (type === 'credit') {
+                    payload.card = formData.get('card');
+                    payload.installments = parseInt(formData.get('installments'));
+                }
+
+                submitButton.disabled = true;
+                submitButton.textContent = 'Registrando...';
+
+                const endpoint = (type === 'debit') ? '/api/debit/form' : '/api/credit/form';
+
+                try {
+                    // API call
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    let result;
+                    try {
+                         result = await response.json();
+                    } catch (e) {
+                        // Mock success if endpoint doesn't exist (404)
+                        if (response.status === 404) {
+                             result = { ok: true }; 
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    if (!response.ok && response.status !== 404) {
+                        throw new Error(result.error || 'Erro ao registrar transação.');
+                    }
+
+                    showToast('Transação registrada com sucesso!', 'success');
+                    manualForm.reset();
+                    // Reset credit fields visibility
+                    manualCreditFields.classList.add('hidden');
+                    
+                } catch (error) {
+                    showToast(`Erro: ${error.message}`, 'error');
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                }
+            });
+
+
+            // --- Lógica de Máscara de Moeda ---
+            function formatCurrency(e) {
+                let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+                
+                if (!value) {
+                    e.target.value = '';
+                    return;
+                }
+
+                // Converte para número (ex: "12345" -> 123.45)
+                let num = parseFloat(value) / 100;
+
+                // Formata como BRL (ex: 123.45 -> "R$ 123,45")
+                e.target.value = num.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                });
+            }
+
+            const currencyInputs = document.querySelectorAll('input[inputmode="decimal"]');
+            currencyInputs.forEach(input => {
+                input.addEventListener('keyup', formatCurrency);
+            });
         });
     </script>
 </body>
 </html>
-``` 

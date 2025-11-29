@@ -65,76 +65,108 @@ class Bill:
         return file_path
         
 
-    def credit(self, data):
+    def credit(self, data, photo):
 
-        file_path = self.load_image(data)
+        if photo:
 
-        # GEMINI \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+            file_path = self.load_image(data)
 
-        bill_data = None
+            # GEMINI \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-        print(cyan("[back-end]: ") + "reading file...")
-        
-        # Determina o tipo MIME baseado na extensão
-        ext = os.path.splitext(file_path)[1].lower()
-        mime_types = {
-            '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg',
-            '.png': 'image/png',
-            '.pdf': 'application/pdf',
-            '.gif': 'image/gif',
-            '.webp': 'image/webp'
-        }
-        mime_type = mime_types.get(ext, 'image/jpeg')
+            bill_data = None
 
-        # Lê o arquivo
-        with open(file_path, 'rb') as f:
-            file_bytes = f.read()
+            print(cyan("[back-end]: ") + "reading file...")
+            
+            # Determina o tipo MIME baseado na extensão
+            ext = os.path.splitext(file_path)[1].lower()
+            mime_types = {
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.pdf': 'application/pdf',
+                '.gif': 'image/gif',
+                '.webp': 'image/webp'
+            }
+            mime_type = mime_types.get(ext, 'image/jpeg')
 
-        model = genai.GenerativeModel('gemini-2.5-pro')
-        response = model.generate_content([
-            {
-                'mime_type': mime_type,
-                'data': file_bytes
-            },
-            f"""Analise este comprovante de uma compra no crédito e extraia APENAS em formato JSON válido (sem markdown, sem texto extra).
+            # Lê o arquivo
+            with open(file_path, 'rb') as f:
+                file_bytes = f.read()
 
-            Retorne EXATAMENTE esta estrutura JSON:
-            {{
-                "nome":"nome da empresa provedora (Somente a primeira letra maiuscula)",
-                "valor": "valor numérico em reais (ex: 150.50) ou null se não encontrado",
-                "data": "data no formato AAAA-MM-DD HH:MM:SS ou null se não encontrado. Se a data da compra passar o dia limite do cartão {BANKS}, adicione 1 mês data",
-                "localizacao": "cidade que o usuário fez o pagamento(somente a cidade) ou null se não encontrado",
-                "tipo_conta": "Com base nas informações escolha uma das opções: {TYPES}",
-                "empresa": "nome da empresa provedora(Somente a primeira letra maiuscula) ou null",
-                "cartao": "em que cartão a transação foi efetuada: {BANKS} (SOMENTE O NOME DO CARTÃO STR); "
-                "parcelas": "Quantidade de parcelas";
-            }}
+            model = genai.GenerativeModel('gemini-2.5-pro')
+            response = model.generate_content([
+                {
+                    'mime_type': mime_type,
+                    'data': file_bytes
+                },
+                f"""Analise este comprovante de uma compra no crédito e extraia APENAS em formato JSON válido (sem markdown, sem texto extra).
 
-            IMPORTANTE:
-            - Responda SOMENTE com JSON válido
-            - Se não conseguir encontrar um valor, use null
-            - Para valor, extraia apenas o número (ex: 150.50, não "R$ 150,50")
-            - Para data, retorne em YYYY-MM-DD HH:MM:SS
-            - Para localização, use endereço ou cidade+estado se disponível"""
-        ])
+                Retorne EXATAMENTE esta estrutura JSON:
+                {{
+                    "nome":"nome da empresa provedora (Somente a primeira letra maiuscula)",
+                    "valor": "valor numérico em reais (ex: 150.50) ou null se não encontrado",
+                    "data": "data no formato AAAA-MM-DD HH:MM:SS ou null se não encontrado. Se a data da compra passar o dia limite do cartão {BANKS}, adicione 1 mês data",
+                    "localizacao": "cidade que o usuário fez o pagamento(somente a cidade) ou null se não encontrado",
+                    "tipo_conta": "Com base nas informações escolha uma das opções: {TYPES}",
+                    "empresa": "nome da empresa provedora(Somente a primeira letra maiuscula) ou null",
+                    "cartao": "em que cartão a transação foi efetuada: {BANKS} (SOMENTE O NOME DO CARTÃO STR); "
+                    "parcelas": "Quantidade de parcelas";
+                }}
 
-        print(cyan("[back-end]: ") + "File was read.")
-        # print(cyan("[back-end]: ") + "Data founded:")
-        # print(f"{response.text}")
+                IMPORTANTE:
+                - Responda SOMENTE com JSON válido
+                - Se não conseguir encontrar um valor, use null
+                - Para valor, extraia apenas o número (ex: 150.50, não "R$ 150,50")
+                - Para data, retorne em YYYY-MM-DD HH:MM:SS
+                - Para localização, use endereço ou cidade+estado se disponível"""
+            ])
 
-        # Parse JSON response
-        response_text = response.text.strip()
-        if response_text.startswith('```json'):
-            response_text = response_text[7:]
-        if response_text.startswith('```'):
-            response_text = response_text[3:]
-        if response_text.endswith('```'):
-            response_text = response_text[:-3]
-        response_text = response_text.strip()
-        
-        bill_data = json.loads(response_text)
+            print(cyan("[back-end]: ") + "File was read.")
+            # print(cyan("[back-end]: ") + "Data founded:")
+            # print(f"{response.text}")
 
+            # Parse JSON response
+            response_text = response.text.strip()
+            if response_text.startswith('```json'):
+                response_text = response_text[7:]
+            if response_text.startswith('```'):
+                response_text = response_text[3:]
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+            
+            bill_data = json.loads(response_text)
+
+        else: 
+            
+            bill_data = {
+                "nome": data.get("name") or data.get("nome"),
+                "valor": data.get("value") or data.get("valor"),
+                "data": data.get("date") or data.get("data"),
+                "localizacao": data.get("location") or data.get("localizacao"),
+                "tipo_conta": data.get("category") or data.get("tipo") or data.get("tipo_conta"),
+                "empresa": data.get("company") or data.get("empresa"),
+                "cartao": data.get("card") or data.get("cartao"),
+                "parcelas": data.get("installments") or data.get("parcelas") or 1
+            }
+
+            # Normalize date to 'YYYY-MM-DD HH:MM:SS' where possible
+            dt = bill_data.get("data")
+            if dt:
+                try:
+                    # convert DD/MM/YYYY -> YYYY-MM-DD
+                    if "/" in dt:
+                        parts = dt.split("/")
+                        if len(parts) == 3:
+                            dt = f"{parts[2]}-{parts[1].zfill(2)}-{parts[0].zfill(2)}"
+                    # add time if only date provided
+                    if len(dt) == 10:
+                        dt = f"{dt} 00:00:00"
+                    bill_data["data"] = dt
+                except Exception:
+                    pass
+
+            
         # DATABASE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
         if bill_data.get("cartao") == "Casas Bahia":
@@ -198,7 +230,6 @@ class Bill:
             return jsonify({
                 'ok': False,
                 'status': f'Database error: {str(e)}',
-                'filepath': file_path,
                 'bill': bill_data
             }), 500
 
@@ -209,8 +240,6 @@ class Bill:
             print(cyan("[back-end]: ") + "Bill registered successfully!")
             return jsonify({
             'ok': True,
-            'filename': os.path.basename(file_path),
-            'filepath': file_path,
             'bill': bill_data,
             'status': "Bill registered successfully"
             }), 201
@@ -222,7 +251,6 @@ class Bill:
             return jsonify({
                 'ok': False,
                 'status': 'Database insertion failed',
-                'filepath': file_path,
                 'bill': bill_data
             }), 500
 
@@ -231,7 +259,7 @@ class Bill:
 
 
 
-    def debit(self, data):
+    def debit(self, data, photo):
         
         file_path = self.load_image(data)
 
@@ -239,66 +267,86 @@ class Bill:
 
         bill_data = None
 
-        print(cyan("[back-end]: ") + "reading file...")
-        
-        # Determina o tipo MIME baseado na extensão
-        ext = os.path.splitext(file_path)[1].lower()
-        mime_types = {
-            '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg',
-            '.png': 'image/png',
-            '.pdf': 'application/pdf',
-            '.gif': 'image/gif',
-            '.webp': 'image/webp'
-        }
-        mime_type = mime_types.get(ext, 'image/jpeg')
+        if photo:
 
-        # Lê o arquivo
-        with open(file_path, 'rb') as f:
-            file_bytes = f.read()
+            print(cyan("[back-end]: ") + "reading file...")
+            
+            # Determina o tipo MIME baseado na extensão
+            ext = os.path.splitext(file_path)[1].lower()
+            mime_types = {
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.pdf': 'application/pdf',
+                '.gif': 'image/gif',
+                '.webp': 'image/webp'
+            }
+            mime_type = mime_types.get(ext, 'image/jpeg')
 
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content([
-            {
-                'mime_type': mime_type,
-                'data': file_bytes
-            },
-            f"""Analise esta imagem de fatura/conta e extraia APENAS em formato JSON válido (sem markdown, sem texto extra).
+            # Lê o arquivo
+            with open(file_path, 'rb') as f:
+                file_bytes = f.read()
 
-            Retorne EXATAMENTE esta estrutura JSON:
-            {{
-                "nome":"nome da empresa provedora (Somente a primeira letra maiuscula)",
-                "valor": "valor numérico em reais (ex: 150.50) ou null se não encontrado",
-                "data": "data no formato AAAA-MM-DD HH:MM:SS ou null se não encontrado",
-                "localizacao": "cidade que o usuário fez o pagamento(somente a cidade) ou null se não encontrado",
-                "tipo_conta": "Com base nas informações escolha uma das opções: {TYPES}",
-                "empresa": "nome da empresa provedora(Somente a primeira letra maiuscula) ou null",
-                "cartao": "em que cartão a transação foi efetuada: {BANKS}"
-            }}
+            model = genai.GenerativeModel('gemini-2.5-flash')
+            response = model.generate_content([
+                {
+                    'mime_type': mime_type,
+                    'data': file_bytes
+                },
+                f"""Analise esta imagem de fatura/conta e extraia APENAS em formato JSON válido (sem markdown, sem texto extra).
 
-            IMPORTANTE:
-            - Responda SOMENTE com JSON válido
-            - Se não conseguir encontrar um valor, use null
-            - Para valor, extraia apenas o número (ex: 150.50, não "R$ 150,50")
-            - Para data, retorne em DD/MM/YYYY
-            - Para localização, use endereço ou cidade+estado se disponível"""
-        ])
+                Retorne EXATAMENTE esta estrutura JSON:
+                {{
+                    "nome":"nome da empresa provedora (Somente a primeira letra maiuscula)",
+                    "valor": "valor numérico em reais (ex: 150.50) ou null se não encontrado",
+                    "data": "data no formato AAAA-MM-DD HH:MM:SS ou null se não encontrado",
+                    "localizacao": "cidade que o usuário fez o pagamento(somente a cidade) ou null se não encontrado",
+                    "tipo_conta": "Com base nas informações escolha uma das opções: {TYPES}",
+                    "empresa": "nome da empresa provedora(Somente a primeira letra maiuscula) ou null",
+                    "cartao": "em que cartão a transação foi efetuada: {BANKS}"
+                }}
 
-        print(cyan("[back-end]: ") + "File was read.")
-        # print(cyan("[back-end]: ") + "Data founded:")
-        # print(f"{response.text}")
+                IMPORTANTE:
+                - Responda SOMENTE com JSON válido
+                - Se não conseguir encontrar um valor, use null
+                - Para valor, extraia apenas o número (ex: 150.50, não "R$ 150,50")
+                - Para data, retorne em DD/MM/YYYY
+                - Para localização, use endereço ou cidade+estado se disponível"""
+            ])
 
-        # Parse JSON response
-        response_text = response.text.strip()
-        if response_text.startswith('```json'):
-            response_text = response_text[7:]
-        if response_text.startswith('```'):
-            response_text = response_text[3:]
-        if response_text.endswith('```'):
-            response_text = response_text[:-3]
-        response_text = response_text.strip()
-        
-        bill_data = json.loads(response_text)
+            print(cyan("[back-end]: ") + "File was read.")
+            # print(cyan("[back-end]: ") + "Data founded:")
+            # print(f"{response.text}")
+
+            # Parse JSON response
+            response_text = response.text.strip()
+            if response_text.startswith('```json'):
+                response_text = response_text[7:]
+            if response_text.startswith('```'):
+                response_text = response_text[3:]
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+            
+            bill_data = json.loads(response_text)
+
+        else:
+            # Normalize incoming payload into the same shape used when OCR/AI is used
+            bill_data = {
+                "type": data.get('type'),
+                "nome": data.get('name') or data.get('nome'),
+                "valor": data.get('value') or data.get('valor'),
+                # keep date as provided (expected formats: YYYY-MM-DD or DD/MM/YYYY)
+                "data": data.get('date') or data.get('data'),
+                "localizacao": data.get('location') or data.get('localizacao'),
+                "tipo_conta": data.get('category') or data.get('tipo_conta'),
+                "empresa": data.get('company') or data.get('empresa'),
+                # optional card field
+                "cartao": data.get('card') or data.get('cartao')
+            }
+            #print(cyan("[back-end]: ") + f"Using provided bill data: {bill_data}")
+
+
 
         # DATABASE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
@@ -339,8 +387,6 @@ class Bill:
                 print(cyan("[back-end]: ") + "Bill registered successfully!")
                 return jsonify({
                     'ok': True,
-                    'filename': os.path.basename(file_path),
-                    'filepath': file_path,
                     'bill': bill_data,
                     'status': "Bill registered successfully"
                 }), 201
@@ -350,7 +396,6 @@ class Bill:
                 return jsonify({
                     'ok': False,
                     'status': 'Database insertion failed',
-                    'filepath': file_path,
                     'bill': bill_data
                 }), 500
 
@@ -361,5 +406,4 @@ class Bill:
             return jsonify({
                 'ok': False,
                 'status': f'Database error: {str(e)}',
-                'filepath': file_path,
                 'bill': bill_data}), 500
