@@ -11,3 +11,11 @@ def debit_upload():
 
     data = request.get_json() ; backend = Backend()
     return backend.bill.debit(data)
+
+@debit.route('/debit/form', methods= ['POST']) #methods=['GET', 'POST']
+def debit_form_upload():
+        
+    print(yellow("[API]: ") + "POST request from api/debit/form received")
+
+    data = request.get_json() ; backend = Backend()
+    return backend.bill.debit(data)
