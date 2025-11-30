@@ -18,9 +18,9 @@ class DbSalary:
             print(blue("[Database]: ") + "registering salary...")
 
             cur.execute(
-                """INSERT INTO salary (salary_id, date, salary_value, description, created_at)
-                    VALUES (%s, %s, %s, %s, %s)""",
-                (salary_id, date, value, description, timestamp),
+                """INSERT INTO salary (salary_id, date, user_salary)
+                    VALUES (%s, %s, %s)""",
+                (salary_id, date, value),
             )
             
             self.conn.commit()

@@ -11,7 +11,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBFe0IwRlSAVfQBf3td4sBx69l_-3
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data/receipts")
 
 TYPES = ["Home","Market","Leisure","Cloth","Restaurant","Public transport","Private transport","Studies","Digital","Health","Street food","Other"]
-BANKS = [("Inter","*1468","9"),("Pagbank","**3298","15"),("Mercado Pago","**3339","6")]
+BANKS = [("Inter","*1468",9,15),("PagBank","*3298",15,23),("Mercado Pago","*3339",6,13),("Casas Bahia","*6889",6,20)]
 
 class Bill:
 
@@ -150,28 +150,30 @@ class Bill:
                 "parcelas": data.get("installments") or data.get("parcelas") or 1
             }
 
-            # Normalize date to 'YYYY-MM-DD HH:MM:SS' where possible
-        
-            data_transacao=bill_data("data").split("/")
+            data_transacao=bill_data.get("data").split("-")
             for dadosBanco, j in enumerate(data_transacao):
                 data_transacao[dadosBanco] = int(j)
 
             for BankData in BANKS:
+             
                 if BankData[0]==bill_data.get("cartao"):
-                    if data_transacao[0]<=BankData[2]:
-                        data_transacao[0]=BankData[2]
-                        print("A")
-                    elif data_transacao[0]>BankData[2] and data_transacao[1]<12:
-                        data_transacao[0]=BankData[2]
+                    if data_transacao[2]<=BankData[2]:
+                        data_transacao[2]=BankData[3]
+                        
+                    elif data_transacao[2]>BankData[2] and data_transacao[1]<12:
+                        data_transacao[2]=BankData[3]
                         data_transacao[1]=data_transacao[1]+1
-                        print("B")
-                    elif data_transacao[0]>BankData[2] and data_transacao[1]==12:
-                        data_transacao[0]=BankData[2]
+                        
+                    elif data_transacao[2]>BankData[2] and data_transacao[1]==12:
+                        data_transacao[2]=BankData[3]
                         data_transacao[1]=1
-                        data_transacao[2]=data_transacao[2]+1
-                        print("C")
+                        data_transacao[0]=data_transacao[0]+1
+                        
+                    else:
+                        print("ERROR A")
+                        break
 
-            bill_data["data"] = f"{data_transacao[2]}-{data_transacao[1]}-{data_transacao[0]} 00:00:00"
+            bill_data["data"] = f"{data_transacao[0]}-{data_transacao[1]}-{data_transacao[2]} 00:00:00"
             
             
         lat = data.get("latitude")

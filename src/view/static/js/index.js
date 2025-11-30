@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dropZone) { // Garante que o código só rode se os elementos existirem
         let selectedFiles = [];
-        const API_ENDPOINT_DEBIT = '/api/debit';
+        const API_ENDPOINT_DEBIT = '/api/debit/form';
 
         function validateFile(file) {
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
