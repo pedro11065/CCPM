@@ -8,7 +8,7 @@ class DbBill:
         self.db = db
         self.conn = db.conn
 
-    def create(self, debtor_id, name, date, value, installment, installment_value, remaining_installments, remaining, subscription, localization, bank, place, type, credit = True):
+    def create(self, debtor_id, name, date, value, installment, installment_value, remaining_installments, remaining, subscription, localization, coordinates, bank, place, type, credit = True):
 
         def add_months(dt, months):
             month = dt.month - 1 + months
@@ -70,8 +70,8 @@ class DbBill:
                 print(blue("[Database]: ") + "registering bill...")
 
                 cur.execute(
-                    """INSERT INTO bills (bill_id, debtor_id, date, bill_name, value, installment, installment_value, remaining_installment, remaining, show, localization, bank, place, type, created_at, credit)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                    """INSERT INTO bills (bill_id, debtor_id, date, bill_name, value, installment, installment_value, remaining_installment, remaining, show, localization, bank, place, type, created_at, credit, coordinates)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     (
                         bill_id,
                         debtor_id,
@@ -88,7 +88,8 @@ class DbBill:
                         place,
                         type,
                         formatted_string,
-                        credit
+                        credit,
+                        coordinates
                     ),
                 )
 

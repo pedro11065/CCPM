@@ -12,6 +12,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
     <!-- CSS Integrado (Original + Novas Melhorias) -->
     <style>
         /* Estilos do style.css original */
@@ -162,6 +165,11 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        /* Fix para Leaflet e Tailwind */
+        .leaflet-pane img {
+            max-width: none !important;
         }
     </style>
 </head>
@@ -316,7 +324,13 @@
                 <!-- Localização -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
-                    <input type="text" name="location" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" name="location" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-2">
+                    
+                    <!-- Mapa -->
+                    <div id="map" class="h-64 w-full rounded-lg border border-gray-300 z-0"></div>
+                    <input type="hidden" name="latitude" id="latitude">
+                    <input type="hidden" name="longitude" id="longitude">
+                    <p class="text-xs text-gray-500 mt-1">Clique no mapa para selecionar a localização exata.</p>
                 </div>
 
                 <!-- Categoria -->
@@ -336,6 +350,7 @@
                         <option value="Health">Health</option>
                         <option value="Street food">Street food</option>
                         <option value="Other">Other</option>
+                        <option value="cosmetic">cosmetic</option>
                     </select>
                 </div>
 
@@ -372,6 +387,9 @@
 
 
     <!-- JavaScript Integrado (Original + Novas Melhorias) -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script type="module">
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -750,7 +768,9 @@
                     date: formData.get('date'),
                     location: formData.get('location'),
                     category: formData.get('category'),
-                    company: formData.get('company')
+                    company: formData.get('company'),
+                    latitude: formData.get('latitude'),
+                    longitude: formData.get('longitude')
                 };
 
                 if (type === 'credit') {
@@ -823,6 +843,53 @@
             const currencyInputs = document.querySelectorAll('input[inputmode="decimal"]');
             currencyInputs.forEach(input => {
                 input.addEventListener('keyup', formatCurrency);
+            });
+
+
+            // --- Lógica do Mapa (Leaflet) ---
+            let map;
+            let marker;
+
+            function initMap() {
+                if (map) return; // Já inicializado
+
+                // Coordenadas de São Paulo
+                const spCoords = [-23.5505, -46.6333];
+
+                map = L.map('map').setView(spCoords, 12);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // Evento de clique no mapa
+                map.on('click', function(e) {
+                    const lat = e.latlng.lat;
+                    const lng = e.latlng.lng;
+
+                    // Atualiza inputs hidden
+                    document.getElementById('latitude').value = lat;
+                    document.getElementById('longitude').value = lng;
+
+                    // Adiciona ou move o marcador
+                    if (marker) {
+                        marker.setLatLng(e.latlng);
+                    } else {
+                        marker = L.marker(e.latlng).addTo(map);
+                    }
+                });
+            }
+
+            // Inicializa o mapa quando a aba Manual for clicada
+            navManual.addEventListener('click', () => {
+                // Delay aumentado para 400ms para garantir que a transição de aba (300ms) terminou
+                // e o container do mapa está visível antes de calcular o tamanho.
+                setTimeout(() => {
+                    initMap();
+                    if (map) {
+                        map.invalidateSize(); // Corrige renderização (área cinza)
+                    }
+                }, 400);
             });
         });
     </script>

@@ -1,11 +1,35 @@
 
-BANKS = [("Inter","*1468","9"),("Pagbank","*3298","15"),("Mercado Pago","*3339","6"),("Casas Bahia","6889","")]
+BANKS = [("Inter","*1468",9),("PagBank","*3298",15),("Mercado Pago","*3339",6),("Casas Bahia","*6889",6)]
 
-banco = ""
-dt = '29/11/2025'
+banco = "PagBank"
+data_transacao = '16/12/2025'
 
-dt_split = dt.split("/")
-print(dt_split)
+data_transacao = data_transacao.split("/")
+for dadosBanco, j in enumerate(data_transacao):
+    data_transacao[dadosBanco] = int(j)
+
+print(data_transacao)
+
+
+for dadosBanco in BANKS:
+    if dadosBanco[0]==banco:
+        print(banco)
+        if data_transacao[0]<=dadosBanco[2]:
+            data_transacao[0]=dadosBanco[2]
+            print("A")
+        elif data_transacao[0]>dadosBanco[2] and data_transacao[1]<12:
+            data_transacao[0]=dadosBanco[2]
+            data_transacao[1]=data_transacao[1]+1
+            print("B")
+        elif data_transacao[0]>dadosBanco[2] and data_transacao[1]==12:
+            data_transacao[0]=dadosBanco[2]
+            data_transacao[1]=1
+            data_transacao[2]=data_transacao[2]+1
+            print("C")
+
+data_transacao = f"{data_transacao[2]}/{data_transacao[1]}/{data_transacao[0]} 00:00:00"
+
+print(data_transacao)
 
 # if dt:
 #     try:
@@ -20,4 +44,3 @@ print(dt_split)
 #     except Exception:
 #         pass
  
-print(dt)

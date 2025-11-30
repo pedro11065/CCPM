@@ -151,20 +151,32 @@ class Bill:
             }
 
             # Normalize date to 'YYYY-MM-DD HH:MM:SS' where possible
-            dt = bill_data.get("data")
-            if dt:
-                try:
-                    # convert DD/MM/YYYY -> YYYY-MM-DD
-                    if "/" in dt:
-                        parts = dt.split("/")
-                        if len(parts) == 3:
-                            dt = f"{parts[2]}-{parts[1].zfill(2)}-{parts[0].zfill(2)}"
-                    # add time if only date provided
-                    if len(dt) == 10:
-                        dt = f"{dt} 00:00:00"
-                    bill_data["data"] = dt
-                except Exception:
-                    pass
+        
+            data_transacao=bill_data("data").split("/")
+            for dadosBanco, j in enumerate(data_transacao):
+                data_transacao[dadosBanco] = int(j)
+
+            for BankData in BANKS:
+                if BankData[0]==bill_data.get("cartao"):
+                    if data_transacao[0]<=BankData[2]:
+                        data_transacao[0]=BankData[2]
+                        print("A")
+                    elif data_transacao[0]>BankData[2] and data_transacao[1]<12:
+                        data_transacao[0]=BankData[2]
+                        data_transacao[1]=data_transacao[1]+1
+                        print("B")
+                    elif data_transacao[0]>BankData[2] and data_transacao[1]==12:
+                        data_transacao[0]=BankData[2]
+                        data_transacao[1]=1
+                        data_transacao[2]=data_transacao[2]+1
+                        print("C")
+
+            bill_data["data"] = f"{data_transacao[2]}-{data_transacao[1]}-{data_transacao[0]} 00:00:00"
+            
+            
+        lat = data.get("latitude")
+        lng = data.get("longitude")
+        coordinates = f"{lat}, {lng}" if lat and lng else None
 
             
         # DATABASE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -217,6 +229,7 @@ class Bill:
                 remaining=value,
                 subscription=False,
                 localization=bill_data.get("localizacao"),
+                coordinates=coordinates,
                 bank=bill_data.get("cartao"),
                 place=bill_data.get("empresa"),
                 type=bill_data.get("tipo_conta"),
@@ -345,6 +358,8 @@ class Bill:
                 "cartao": data.get('card') or data.get('cartao')
             }
             #print(cyan("[back-end]: ") + f"Using provided bill data: {bill_data}")
+            
+        coordinates=data.get("latitude") + ", " + data.get("longitude")
 
 
 
@@ -374,6 +389,7 @@ class Bill:
                 remaining=value,
                 subscription=False,
                 localization=bill_data.get("localizacao"),
+                coordinates=coordinates,
                 bank=bill_data.get("cartao"),
                 place=bill_data.get("empresa"),
                 type=bill_data.get("tipo_conta"),
